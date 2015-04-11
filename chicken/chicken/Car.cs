@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Content;
 
 namespace chicken
 {
-    class Car
+    public class Car
     {
         public int lane = 1;
         Vector2 position = new Vector2(200, 200);
@@ -24,11 +24,17 @@ namespace chicken
 
         int MAX_DELTA = 5;
 
-        public Car(Texture2D texture, int x = 200, int y=-1)
+        public Rectangle collisionBox = new Rectangle(0, 0, 0, 0);
+        Game1 game;
+
+        Boolean stop = false;
+
+        public Car(Game1 _game, Texture2D texture, int x = 200, int y=-1)
         {
             position.X = x;
             position.Y = (y==-1) ? 140 + lane * 100: y;
             carTexture = texture;
+            game = _game;
         }
 
         public void Update(GameTime gameTime)
@@ -46,21 +52,29 @@ namespace chicken
             oldKeyState = state;
 
             //move car
-            int desiredPosition = 140 + lane * 100;
-            float diff = position.Y - desiredPosition;
-            if (Math.Abs(diff) < MAX_DELTA)
+            if (!stop)
             {
-                position.Y = desiredPosition;
-                carAngle = MathHelper.Pi / 2;
-            }
-            else
-            {
-                int direction = (diff > 0) ? -1 : 1;
+                int desiredPosition = 140 + lane * 100;
+                float diff = position.Y - desiredPosition;
+                if (Math.Abs(diff) < 3 * game.road.SPEED / 100)
+                {
+                    position.Y = desiredPosition;
+                    carAngle = MathHelper.Pi / 2;
+                }
+                else
+                {
+                    int direction = (diff > 0) ? -1 : 1;
 
-                position.Y += direction * MAX_DELTA;
+                    position.Y += direction * (3*game.road.SPEED/100);
 
-                carAngle = (MathHelper.Pi / 2) + MathHelper.Pi / 20 * direction;
+                    carAngle = (MathHelper.Pi / 2) + MathHelper.Pi / 20 * direction;
+                }
             }
+            // update collision box
+            collisionBox.Location = new Point((int)position.X - carTexture.Height, (int)position.Y);
+            collisionBox.Width = carTexture.Height;
+            collisionBox.Height = carTexture.Width;
+
 
         }
 
@@ -71,8 +85,14 @@ namespace chicken
 
             spriteBatch.Draw(carTexture, position, null, Color.White, carAngle, new Vector2(0, 0), new Vector2(1, 1), SpriteEffects.None, 0);
 
+           // game.DrawRectangle(collisionBox, Color.White, spriteBatch);
         }
 
+
+        public void Stop(bool stopping)
+        {
+            stop = stopping;
+        }       
 
     }
 }

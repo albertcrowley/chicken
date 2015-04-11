@@ -23,10 +23,10 @@ namespace chicken
         private SpriteFont font;
         private Texture2D line;
         private Texture2D edge;
-        int score = 0;
+        public int score = 0;
 
-        chicken.Car car = null;
-        chicken.Road road = null;
+        public chicken.Car car = null;
+        public chicken.Road road = null;
 
         public Game1()
         {
@@ -58,13 +58,18 @@ namespace chicken
 
             // TODO: use this.Content to load your game content here
             roadTexture = Content.Load<Texture2D>("Road");
-            carTexture = Content.Load<Texture2D>("CarBlue");
             line = Content.Load<Texture2D>("line");
             edge = Content.Load<Texture2D>("LeftBump");
             font = Content.Load<SpriteFont>("SpriteFont1");
 
-            car = new chicken.Car(carTexture);
-            road = new chicken.Road(line, edge);
+            carTexture = Content.Load<Texture2D>("CarBlue");
+            car = new chicken.Car(this, carTexture);
+
+            List<Texture2D> obs = new List<Texture2D>();
+            obs.Add(Content.Load<Texture2D>("Mons1"));
+            obs.Add(Content.Load<Texture2D>("Mons11"));
+            obs.Add(Content.Load<Texture2D>("Mons9"));
+            road = new chicken.Road(this,line, edge, obs, car);
             
         }
 
@@ -108,10 +113,20 @@ namespace chicken
             car.Draw(gameTime, spriteBatch);
 
             spriteBatch.DrawString(font, "Score: " + score, new Vector2(600, 10), Color.White);
+            spriteBatch.DrawString(font, "Speed: " + road.SPEED, new Vector2(50, 10), Color.White);
+            spriteBatch.DrawString(font, "Distance: " + Math.Floor(road.distance/1000) / 10 + " miles", new Vector2(300, 10), Color.White);
             spriteBatch.End();
 
 
             base.Draw(gameTime);
         }
+
+        public void DrawRectangle(Rectangle coords, Color color, SpriteBatch spriteBatch)
+        {
+            var rect = new Texture2D(GraphicsDevice, 1, 1);
+            rect.SetData(new[] { color });
+            spriteBatch.Draw(rect, coords, color);
+        }
+
     }
 }
